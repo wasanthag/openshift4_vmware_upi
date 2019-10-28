@@ -1,0 +1,41 @@
+- name: Create a directory for ignition files if it does not exist
+  file:
+    path: "{{ ignition_local_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Template install-config.yaml as install-config.yaml.save
+  template:
+    src: install-config.yaml.j2
+    dest: install-config.yaml.save
+
+- name: Template install-config.yaml as install-config.yaml
+  template:
+    src: install-config.yaml.j2
+    dest: "{{ ignition_local_dir }}/install-config.yaml"
+
+- name: Generate Ignition files under {{ ignition_local_dir }}
+  command: openshift-install create ignition-configs --dir="{{ ignition_local_dir }}"
+  register: create_ignition_configs_out
+
+- debug: var=create_ignition_configs_out.stdout_lines
+
+- name: Template append-bootstrap.ign as append-bootstrap.ign.save
+  template:
+    src: append-bootstrap.ign.j2
+    dest: append-bootstrap.ign.save
+
+- name: Template append-bootstrap.ign as append-bootstrap.ign
+  template:
+    src: append-bootstrap.ign.j2
+    dest: "{{ ignition_local_dir }}/append-bootstrap.ign"
+
+- name: Convert master.ign , worker.ign and append-bootstrap.ign to base 64 encoding
+  shell: cd "{{ ignition_local_dir }}"; base64 -w0 master.ign > master.64; base64 -w0 worker.ign > worker.64; base64 -w0 append-bootstrap.ign  > append-bootstrap.64
+  
+- name: Copy bootstrap.ign file to web server {{ web_host }}
+  copy:
+    src: "{{ ignition_local_dir }}/bootstrap.ign"
+    dest: "{{ web_server_path }}/bootstrap.ign"
+  delegate_to: "{{ web_host }}"  
+  remote_user: root

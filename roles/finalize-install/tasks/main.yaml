@@ -1,0 +1,13 @@
+- name: Finalize the Install
+  command: "openshift-install --dir={{ ignition_local_dir }} wait-for install-complete --log-level debug"
+  async: 3600
+  poll: 0
+  register: install_status
+
+- name: Check on cluster install task
+  async_status:
+    jid: "{{ install_status.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 30
+

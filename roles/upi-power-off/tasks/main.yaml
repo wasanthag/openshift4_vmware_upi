@@ -1,0 +1,42 @@
+- name:  Power Off bootstrap
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    template: "{{ rhcos_ova }}"
+    name: "{{ bootstrap_vm_prefix }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: poweredoff
+
+- name:  Power Off masters
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    template: "{{ rhcos_ova }}"
+    name: "{{ master_vm_prefix }}{{ item }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: poweredoff
+  with_sequence: start=0 end=" {{ master_replicas - 1|int }}" stride=1
+
+- name:  Power Off computes
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    template: "{{ rhcos_ova }}"
+    name: "{{ worker_vm_prefix }}{{ item }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: poweredoff
+  with_sequence: start=0 end=" {{ worker_replicas - 1|int }}" stride=1
+
+

@@ -1,0 +1,35 @@
+---
+##VMWare params
+vsphere_host: vmw-cluster1.cloud.mycompany.local
+vsphere_user: administrator@vsphere.local
+vsphere_pass: supersecret
+vsphere_dc: DC1
+vsphere_cluster: Cluster-1
+vsphere_defaultDatastore: EMC-Datastore1
+vsphere_vm_folder: ocp4c1
+rhcos_ova: rhcos-4.2.0-x86_64-vmware
+bootstrap_vm_prefix: bootstrap
+master_vm_prefix: master
+worker_vm_prefix: compute
+bootstrap_cpus: 4
+bootstrap_ram: 32768
+bootstrap_ram_reserv: 32768
+master_cpus: 4
+master_ram: 32768
+master_ram_reserv: 32768
+worker_cpus: 2
+worker_ram: 16384
+worker_ram_reserv: 16384
+##Web server hosting bootstrap.ign params
+web_host: webserver.cloud.mycompany.local
+web_dir: /pub/coreos
+web_server_path: /var/www/html/pub/coreos
+web_host-user: root
+ignition_local_dir: /home/wasantha/ocp4-ignition
+##OCP 4 params
+baseDomain: cloud.mycompany.local
+master_replicas: 3
+worker_replicas: 3
+cluster_name: ocp4c1
+pullSecret: '{"auths":{"cloud.openshift.com":{=xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+sshKey: 'ssh-rsa xxxxxxxxx' 

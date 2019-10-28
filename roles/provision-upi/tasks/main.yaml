@@ -1,0 +1,101 @@
+- name:  Clone bootstrap from rhcos template and customize
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    template: "{{ rhcos_ova }}"
+    name: "{{ bootstrap_vm_prefix }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: poweredoff
+    disk:
+    - size_gb: 120
+      type: thin
+      datastore: "{{ vsphere_defaultDatastore }}"
+    hardware:
+      memory_mb: "{{ bootstrap_ram }}"
+      num_cpus: "{{ bootstrap_cpus }}"
+      mem_reservation: "{{ bootstrap_ram_reserv }}"
+    customvalues:
+      - key: disk.EnableUUID
+        value: 'TRUE'
+      - key: sched.cpu.latencySensitivity
+        value: 'high'
+      - key: guestinfo.ignition.config.data.encoding
+        value: 'base64'
+      - key: guestinfo.ignition.config.data
+        value: "{{ bootstrap_ignition }}"
+      - key: guestinfo.ovfEnv
+        value: '<Environment oe:id="" xmlns="http://schemas.dmtf.org/ovf/environment/1" xmlns:oe="http://schemas.dmtf.org/ovf/environment/1" xmlns:ve="http://www.vmware.com/schema/ovfenv" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><PropertySection><Property oe:key="guestinfo.ignition.config.data" oe:value="{{ bootstrap_ignition }}"/><Property oe:key="guestinfo.ignition.config.data.encoding" oe:value="base64"/></PropertySection></Environment>'
+  register: clone_out
+
+- name:  Clone masters from rhcos template and customize
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    template: "{{ rhcos_ova }}"
+    name: "{{ master_vm_prefix }}{{ item }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: poweredoff
+    disk:
+    - size_gb: 120
+      type: thin
+      datastore: "{{ vsphere_defaultDatastore }}"
+    hardware:
+      memory_mb: "{{ master_ram }}"
+      num_cpus: "{{ master_cpus }}"
+      mem_reservation: "{{ master_ram_reserv }}"
+    customvalues:
+      - key: disk.EnableUUID
+        value: 'TRUE'
+      - key: sched.cpu.latencySensitivity
+        value: 'high'
+      - key: guestinfo.ignition.config.data.encoding
+        value: 'base64'
+      - key: guestinfo.ignition.config.data
+        value: "{{ master_ignition }}"
+      - key: guestinfo.ovfEnv
+        value: '<Environment oe:id="" xmlns="http://schemas.dmtf.org/ovf/environment/1" xmlns:oe="http://schemas.dmtf.org/ovf/environment/1" xmlns:ve="http://www.vmware.com/schema/ovfenv" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><PropertySection><Property oe:key="guestinfo.ignition.config.data" oe:value="{{ master_ignition }}"/><Property oe:key="guestinfo.ignition.config.data.encoding" oe:value="base64"/></PropertySection></Environment>'
+  with_sequence: start=0 end=" {{ master_replicas - 1|int }}" stride=1
+  register: clone_out
+
+- name:  Clone computes from rhcos template and customize
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    template: "{{ rhcos_ova }}"
+    name: "{{ worker_vm_prefix }}{{ item }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: poweredoff
+    disk:
+    - size_gb: 120
+      type: thin
+      datastore: "{{ vsphere_defaultDatastore }}"
+    hardware:
+      memory_mb: "{{ worker_ram }}"
+      num_cpus: "{{ worker_cpus }}"
+      mem_reservation: "{{ worker_ram_reserv }}"
+    customvalues:
+      - key: disk.EnableUUID
+        value: 'TRUE'
+      - key: sched.cpu.latencySensitivity
+        value: 'high'
+      - key: guestinfo.ignition.config.data.encoding
+        value: 'base64'
+      - key: guestinfo.ignition.config.data
+        value: "{{ worker_ignition }}"
+      - key: guestinfo.ovfEnv
+        value: '<Environment oe:id="" xmlns="http://schemas.dmtf.org/ovf/environment/1" xmlns:oe="http://schemas.dmtf.org/ovf/environment/1" xmlns:ve="http://www.vmware.com/schema/ovfenv" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><PropertySection><Property oe:key="guestinfo.ignition.config.data" oe:value="{{ worker_ignition }}"/><Property oe:key="guestinfo.ignition.config.data.encoding" oe:value="base64"/></PropertySection></Environment>'
+  with_sequence: start=0 end=" {{ worker_replicas - 1|int }}" stride=1
+  register: clone_out
+

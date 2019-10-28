@@ -1,0 +1,3 @@
+- name: Check Openshift cluster operator status
+  shell: export KUBECONFIG="{{ ignition_local_dir }}"/auth/kubeconfig; oc get co
+ 

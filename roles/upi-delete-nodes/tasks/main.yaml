@@ -1,0 +1,39 @@
+- name:  Delete bootstrap
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    name: "{{ bootstrap_vm_prefix }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: absent
+
+- name:  Delete masters
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    name: "{{ master_vm_prefix }}{{ item }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: absent
+  with_sequence: start=0 end=" {{ master_replicas - 1|int }}" stride=1
+
+- name:  Delete computes
+  vmware_guest:
+    hostname: "{{ vsphere_host }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_pass }}"
+    validate_certs: no
+    datacenter: "{{ vsphere_dc }}"
+    folder: "{{ vsphere_vm_folder }}"
+    name: "{{ worker_vm_prefix }}{{ item }}"
+    cluster: "{{ vsphere_cluster }}"
+    state: absent
+  with_sequence: start=0 end=" {{ worker_replicas - 1|int }}" stride=1
+
+

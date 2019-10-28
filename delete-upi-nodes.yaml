@@ -1,0 +1,5 @@
+---
+- hosts: localhost
+  roles:
+    - upi-power-off
+    - upi-delete-nodes

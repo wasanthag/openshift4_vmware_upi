@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  vars:
+    bootstrap_ignition: "{{ lookup('file', '{{ ignition_local_dir }}/append-bootstrap.64') }}"
+    master_ignition: "{{ lookup('file', '{{ ignition_local_dir }}/master.64') }}"
+    worker_ignition: "{{ lookup('file', '{{ ignition_local_dir }}/worker.64') }}"
+  roles:
+    - provision-upi

@@ -1,0 +1,16 @@
+- name: Bootstrap cluster with {{ ignition_local_dir }}
+  command: "openshift-install --dir={{ ignition_local_dir }} wait-for bootstrap-complete --log-level debug"
+  async: 3600
+  poll: 0
+  register: bootstrap_status
+
+- name: Check on cluster bootstrap task
+  async_status:
+    jid: "{{ bootstrap_status.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 30
+
+- name: Patch the configs to allow empty dir for registry storage
+  shell: export KUBECONFIG="{{ ignition_local_dir }}"/auth/kubeconfig ; oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+
