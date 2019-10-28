@@ -1,4 +1,4 @@
-# Deploy Openshift 4.1 on VMWare user provisioned Infrastructure
+# Deploy Openshift 4.x on VMWare user provisioned Infrastructure
 This playbooks are tested with OpenShift 4.1 and 4.2 with Vsphere 6.5.0
 
 ## Prerequisites
